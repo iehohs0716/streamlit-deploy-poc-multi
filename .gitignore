@@ -1,0 +1,10 @@
+.env
+terraform.tfvars
+*.tfbackend
+!*.tfbackend.example
+*.tfstate
+*.tfstate.backup
+.terraform/
+uv.lock
+infra/env/dev/.terraform.lock.hcl
+.DS_Store

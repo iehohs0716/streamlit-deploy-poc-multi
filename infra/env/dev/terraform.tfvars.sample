@@ -1,0 +1,5 @@
+aws_region                 = "ap-northeast-1"
+snowflake_private_key_path = "/path/to/snowflake_key.p8"
+snowflake_database         = "YOUR_DATABASE"
+snowflake_warehouse        = "COMPUTE_WH"
+owner                      = "YOUR_OWNER"

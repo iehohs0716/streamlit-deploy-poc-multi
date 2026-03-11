@@ -1,0 +1,20 @@
+[project]
+name = "test"
+version = "0.1.0"
+description = "Streamlit アプリ"
+
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.51.0",
+    "snowflake-connector-python[pandas]>=3.0.0",
+    "snowflake-snowpark-python>=1.0.0",
+    "pandas>=2.0.0",
+    "jinja2>=3.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["apps","common"]
