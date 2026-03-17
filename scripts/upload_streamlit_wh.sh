@@ -23,6 +23,21 @@ WAREHOUSE="COMPUTE_WH"
 
 APP_ROOT="${1:?Usage: $0 <app_path> (e.g. apps/app1)}"
 
+# エントリポイントの自動検出 (main.py / app.py / *_app.py)
+MAIN_FILES=$(find "${STREAMLIT_DIR}/${APP_ROOT}" -maxdepth 1 \( -name 'main.py' -o -name 'app.py' -o -name '*_app.py' \) -exec basename {} \;)
+MAIN_FILE_COUNT=$(echo "$MAIN_FILES" | grep -c .)
+if [ "$MAIN_FILE_COUNT" -eq 0 ]; then
+  echo "ERROR: No entry point found in ${STREAMLIT_DIR}/${APP_ROOT}" >&2
+  echo "  Expected one of: main.py, app.py, *_app.py" >&2
+  exit 1
+elif [ "$MAIN_FILE_COUNT" -gt 1 ]; then
+  echo "ERROR: Multiple entry points found in ${STREAMLIT_DIR}/${APP_ROOT}:" >&2
+  echo "$MAIN_FILES" | sed 's/^/  - /' >&2
+  echo "  Each app directory must contain exactly one entry point." >&2
+  exit 1
+fi
+MAIN_FILE="$MAIN_FILES"
+
 echo "========================================="
 echo "Streamlit Upload & Deploy (WH版)"
 echo "========================================="
@@ -48,7 +63,7 @@ echo "Creating Streamlit app (Warehouse Runtime) ..."
 snow sql -q "
 CREATE OR REPLACE STREAMLIT ${STREAMLIT_NAME}
   FROM '@${STAGE}/${APP_ROOT}'
-  MAIN_FILE = 'streamlit_app.py'
+  MAIN_FILE = '${MAIN_FILE}'
   QUERY_WAREHOUSE = ${WAREHOUSE}
   COMMENT = 'Managed by upload_streamlit_wh.sh';
 " $SNOW_OPTS
