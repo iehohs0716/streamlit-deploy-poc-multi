@@ -3,14 +3,6 @@
 from __future__ import annotations
 
 import os
-import sys
-
-# SiS WH版: pyproject.tomlによるパッケージインストールが使えないため
-# ステージルートをsys.pathに追加して common/ を import 可能にする
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if _PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, _PROJECT_ROOT)
-
 import streamlit as st
 
 from common.utils import execute_query, render_query
@@ -29,7 +21,7 @@ st.title("サンプルアプリ")
 # 選択メニューとテキストフィールドが横に並んだコンポーネント
 col_select, col_text = st.columns(2)
 
-# queries/account_list.sql.j2にある"all_info"CTEを参照して物理名を確認して選択項目を作ること
+# queries/account_list.sql.j2にある"all_info"CTEを参照して物理名を確認して選択項目を作る
 SEARCH_OPTIONS = {
     "メールアドレス検索": "email",
     "氏名検索": "customer_name",
