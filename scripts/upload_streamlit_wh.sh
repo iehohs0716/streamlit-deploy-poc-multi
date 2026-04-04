@@ -1,6 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
+# 必須ツールのチェック関数
+check_command() {
+  if ! command -v "$1" &> /dev/null; then
+    echo "ERROR: $1 コマンドが見つかりません。" >&2
+    echo "$2" >&2
+    exit 1
+  fi
+}
+
+# 依存ツールのチェック
+check_command "snow" "Snowflake CLIをインストールしてください: https://sfc-repo.snowflakecomputing.com/snowflake-cli/index.html"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STREAMLIT_DIR="$SCRIPT_DIR/../streamlit"
 
@@ -15,13 +27,14 @@ export SNOWFLAKE_ACCOUNT="${SNOWFLAKE_ORGANIZATION_NAME}-${SNOWFLAKE_ACCOUNT_NAM
 SNOWFLAKE_ROLE="${SNOWFLAKE_ROLE:?SNOWFLAKE_ROLEを.envに設定してください}"
 SNOW_OPTS="--temporary-connection --account ${SNOWFLAKE_ACCOUNT} --user ${SNOWFLAKE_USER} --authenticator ${SNOWFLAKE_AUTHENTICATOR} --role ${SNOWFLAKE_ROLE}"
 
-DATABASE="${SNOWFLAKE_DATABASE:?SNOWFLAKE_DATABASE is not set}"
-SCHEMA="STREAMLIT_APP_SIS_MULTI"
-STAGE="${DATABASE}.${SCHEMA}.STREAMLIT_STAGE_MULTI"
-STREAMLIT_NAME="${DATABASE}.${SCHEMA}.MART_CHECK_APP_SIS"
-WAREHOUSE="COMPUTE_WH"
-
 APP_ROOT="${1:?Usage: $0 <app_path> (e.g. apps/app1)}"
+
+DATABASE="${SNOWFLAKE_DATABASE:?SNOWFLAKE_DATABASE is not set}"
+SCHEMA="${SNOWFLAKE_SCHEMA}"
+STAGE="${DATABASE}.${SCHEMA}.${SNOWFLAKE_STAGE}"
+APP_PREFIX="${SNOWFLAKE_STREAMLIT_APP_PREFIX:-}"
+STREAMLIT_NAME="${DATABASE}.${SCHEMA}.${APP_PREFIX}_$(echo "${APP_ROOT}" | sed 's/\//_/g' | tr '[:lower:]' '[:upper:]')"
+WAREHOUSE="${SNOWFLAKE_WH}"
 
 # エントリポイントの自動検出 (main.py / app.py / *_app.py)
 MAIN_FILES=$(find "${STREAMLIT_DIR}/${APP_ROOT}" -maxdepth 1 \( -name 'main.py' -o -name 'app.py' -o -name '*_app.py' \) -exec basename {} \;)

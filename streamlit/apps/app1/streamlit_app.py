@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import os
 import streamlit as st
 
-from common.utils import execute_query, render_query
+from common.utils import get_active_session, render_query, execute_query
+
+session = get_active_session() # snowflake.snowpark.context.get_active_session()で定義していたものをそのまま利用可能
 
 # --- ページ設定 ---
 st.set_page_config(
@@ -48,11 +49,8 @@ with col_text:
 # キックオフセレクタに入力があった時点でクエリが発行される
 column_name = SEARCH_OPTIONS.get(search_type, "")
 
-_QUERIES_DIR = os.path.join(os.path.dirname(__file__), "queries")
-
 query = render_query(
     "test.sql.j2",
-    template_dir=_QUERIES_DIR,
     column_name=column_name,
     search_value=search_value,
     limit=50,
